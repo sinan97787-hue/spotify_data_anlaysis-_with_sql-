@@ -1,12 +1,12 @@
-# Spotify Advanced SQL Project and Query Optimization 
-Project Category: Advanced
+# Spotify SQL Analysis (PostgreSQL)
 
-## Overview
-This project involves analyzing a Spotify dataset with various attributes about tracks, albums, and artists using **SQL**. It covers an end-to-end process of normalizing a denormalized dataset, performing SQL queries of varying complexity (easy, medium, and advanced), and optimizing query performance. The primary goals of the project are to practice advanced SQL skills and generate valuable insights from the dataset.
+A SQL project analyzing Spotify + YouTube music data using PostgreSQL.
+
+---
+
+## 📌 Table Schema
 
 ```sql
--- create table
-DROP TABLE IF EXISTS spotify;
 CREATE TABLE spotify (
     artist VARCHAR(255),
     track VARCHAR(255),
@@ -34,77 +34,130 @@ CREATE TABLE spotify (
     most_played_on VARCHAR(50)
 );
 ```
-## Project Steps
-
-### 1. Data Exploration
-Before diving into SQL, it’s important to understand the dataset thoroughly. The dataset contains attributes such as:
-- `Artist`: The performer of the track.
-- `Track`: The name of the song.
-- `Album`: The album to which the track belongs.
-- `Album_type`: The type of album (e.g., single or album).
-- Various metrics such as `danceability`, `energy`, `loudness`, `tempo`, and more.
-
-### 4. Querying the Data
-After the data is inserted, various SQL queries can be written to explore and analyze the data. Queries are categorized into **easy**, **medium**, and **advanced** levels to help progressively develop SQL proficiency.
-
-#### Easy Queries
-- Simple data retrieval, filtering, and basic aggregations.
-  
-#### Medium Queries
-- More complex queries involving grouping, aggregation functions, and joins.
-  
-#### Advanced Queries
-- Nested subqueries, window functions, CTEs, and performance optimization.
-
-### 5. Query Optimization
-In advanced stages, the focus shifts to improving query performance. Some optimization strategies include:
-- **Indexing**: Adding indexes on frequently queried columns.
-- **Query Execution Plan**: Using `EXPLAIN ANALYZE` to review and refine query performance.
-  
----
-
-## 15 Practice Questions
-
-### Easy Level
-1. Retrieve the names of all tracks that have more than 1 billion streams.
-2. List all albums along with their respective artists.
-3. Get the total number of comments for tracks where `licensed = TRUE`.
-4. Find all tracks that belong to the album type `single`.
-5. Count the total number of tracks by each artist.
-
-### Medium Level
-1. Calculate the average danceability of tracks in each album.
-2. Find the top 5 tracks with the highest energy values.
-3. List all tracks along with their views and likes where `official_video = TRUE`.
-4. For each album, calculate the total views of all associated tracks.
-5. Retrieve the track names that have been streamed on Spotify more than YouTube.
-
-### Advanced Level
-1. Find the top 3 most-viewed tracks for each artist using window functions.
-2. Write a query to find tracks where the liveness score is above the average.
-
-----
-## Technology Stack
-- **Database**: PostgreSQL
-- **SQL Queries**: DDL, DML, Aggregations, Joins, Subqueries, Window Functions
-- **Tools**: pgAdmin 4 (or any SQL editor), PostgreSQL (via Homebrew, Docker, or direct installation)
-
-## How to Run the Project
-1. Install PostgreSQL and pgAdmin (if not already installed).
-2. Set up the database schema and tables using the provided normalization structure.
-3. Insert the sample data into the respective tables.
-4. Execute SQL queries to solve the listed problems.
-5. Explore query optimization techniques for large datasets.
 
 ---
 
-## Next Steps
-- **Visualize the Data**: Use a data visualization tool like **Tableau** or **Power BI** to create dashboards based on the query results.
-- **Expand Dataset**: Add more rows to the dataset for broader analysis and scalability testing.
-- **Advanced Querying**: Dive deeper into query optimization and explore the performance of SQL queries on larger datasets.
+## 📥 Import Data
 
-## author 
-Muhammed sinan
+```sql
+COPY spotify
+FROM 'C:/path/spotify.csv'
+DELIMITER ','
+CSV HEADER;
+```
+
+---
+
+## 🧠 SQL Queries
+
+### 1. Tracks with more than 1B streams
+```sql
+SELECT track, stream
+FROM spotify
+WHERE stream > 1000000000;
+```
+
+### 2. Unique albums with artists
+```sql
+SELECT DISTINCT album, artist
+FROM spotify;
+```
+
+### 3. Total comments for licensed tracks
+```sql
+SELECT SUM(comments) AS total_comments
+FROM spotify
+WHERE licensed = TRUE;
+```
+
+### 4. Tracks where album_type = 'single'
+```sql
+SELECT track, album_type
+FROM spotify
+WHERE album_type = 'single';
+```
+
+### 5. Count tracks per artist
+```sql
+SELECT artist, COUNT(*)
+FROM spotify
+GROUP BY artist;
+```
+
+### 6. Average danceability per album
+```sql
+SELECT album, AVG(danceability) AS avg_danceability
+FROM spotify
+GROUP BY album
+ORDER BY avg_danceability DESC;
+```
+
+### 7. Top 5 high-energy tracks
+```sql
+SELECT track, MAX(energy) AS max_energy
+FROM spotify
+GROUP BY track
+ORDER BY max_energy DESC
+LIMIT 5;
+```
+
+### 8. Tracks with official videos
+```sql
+SELECT track, SUM(views), SUM(likes)
+FROM spotify
+WHERE official_video = TRUE
+GROUP BY track
+ORDER BY SUM(views) DESC;
+```
+
+### 9. Total views per album
+```sql
+SELECT album, SUM(views) AS total_views
+FROM spotify
+GROUP BY album
+ORDER BY total_views DESC;
+```
+
+### 10. Tracks streamed more on Spotify than YouTube
+```sql
+SELECT track, stream, most_played_on
+FROM spotify
+WHERE most_played_on = 'spotify';
+```
+
+### 11. Top 3 tracks by views (RANK)
+```sql
+SELECT track, artist, SUM(views) AS total_views,
+       RANK() OVER (ORDER BY SUM(views) DESC) AS rnk
+FROM spotify
+GROUP BY track, artist
+ORDER BY total_views DESC
+LIMIT 3;
+```
+
+### 12. Tracks with liveness above average
+```sql
+SELECT track, liveness
+FROM spotify
+WHERE liveness > (SELECT AVG(liveness) FROM spotify);
+```
+
+---
+
+## 📁 Project Files
+
+```
+📦 postgresql-spotify-project
+ ┣ 📜 postgresql (spotify).sql
+ ┣ 📜 spotify.csv
+ ┗ 📜 README.md
+```
+
+---
+
+## 👤 Author
+Sinan  
+
 
 
 
